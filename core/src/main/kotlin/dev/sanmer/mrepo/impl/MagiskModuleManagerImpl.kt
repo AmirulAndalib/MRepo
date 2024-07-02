@@ -3,7 +3,9 @@ package dev.sanmer.mrepo.impl
 import dev.sanmer.mrepo.Platform
 import dev.sanmer.mrepo.stub.IInstallCallback
 import dev.sanmer.mrepo.stub.IModuleOpsCallback
+import dev.sanmer.su.wrap.ThrowableWrapper.Companion.wrap
 import java.io.File
+import java.io.FileNotFoundException
 
 internal class MagiskModuleManagerImpl : BaseModuleManagerImpl() {
     override fun getPlatform(): String {
@@ -54,7 +56,7 @@ internal class MagiskModuleManagerImpl : BaseModuleManagerImpl() {
     private fun moduleOps(tags: List<Tag>, id: String, callback: IModuleOpsCallback?) {
         val moduleDir = File(modulesDir, id)
         if (!moduleDir.exists()) {
-            callback?.onFailure(id, null)
+            callback?.onFailure(id, FileNotFoundException(moduleDir.path).wrap())
             return
         }
 
@@ -69,7 +71,7 @@ internal class MagiskModuleManagerImpl : BaseModuleManagerImpl() {
         }.onSuccess {
             callback?.onSuccess(id)
         }.onFailure {
-            callback?.onFailure(id, it.message)
+            callback?.onFailure(id, it.wrap())
         }
     }
 

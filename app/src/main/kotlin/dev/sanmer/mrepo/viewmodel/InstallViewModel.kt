@@ -19,6 +19,7 @@ import dev.sanmer.mrepo.repository.UserPreferencesRepository
 import dev.sanmer.mrepo.stub.IInstallCallback
 import dev.sanmer.mrepo.utils.extensions.now
 import dev.sanmer.mrepo.utils.extensions.tmpDir
+import dev.sanmer.su.wrap.ThrowableWrapper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -118,8 +119,9 @@ class InstallViewModel @Inject constructor(
                 }
             }
 
-            override fun onFailure() {
+            override fun onFailure(error: ThrowableWrapper) {
                 event = Event.Failed
+                Timber.e(error.original)
             }
         }
 

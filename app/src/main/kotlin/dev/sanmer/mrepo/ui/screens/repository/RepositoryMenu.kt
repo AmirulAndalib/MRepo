@@ -21,7 +21,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -29,6 +29,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.sanmer.mrepo.R
+import dev.sanmer.mrepo.datastore.model.Homepage
 import dev.sanmer.mrepo.datastore.model.Option
 import dev.sanmer.mrepo.datastore.model.RepositoryMenu
 import dev.sanmer.mrepo.model.online.OnlineModule
@@ -47,10 +48,11 @@ private val options = listOf(
 
 @Composable
 internal fun RepositoryMenu(
-    setMenu: (RepositoryMenu) -> Unit
+    setMenu: (RepositoryMenu) -> Unit,
+    setHomepage: () -> Unit,
 ) {
     val userPreferences = LocalUserPreferences.current
-    var open by rememberSaveable { mutableStateOf(false) }
+    var open by remember { mutableStateOf(false) }
 
     IconButton(
         onClick = { open = true }
@@ -64,7 +66,9 @@ internal fun RepositoryMenu(
             BottomSheet(
                 onClose = { open = false },
                 menu = userPreferences.repositoryMenu,
-                setMenu = setMenu
+                setMenu = setMenu,
+                isHomepage = userPreferences.homepage == Homepage.Repository,
+                setHomepage = setHomepage
             )
         }
     }
@@ -74,12 +78,16 @@ internal fun RepositoryMenu(
 private fun BottomSheet(
     onClose: () -> Unit,
     menu: RepositoryMenu,
-    setMenu: (RepositoryMenu) -> Unit
+    setMenu: (RepositoryMenu) -> Unit,
+    isHomepage: Boolean,
+    setHomepage: () -> Unit
 ) = ModalBottomSheet(
     onDismissRequest = onClose,
     sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true),
     shape = BottomSheetDefaults.expandedShape(15.dp),
-    windowInsets = WindowInsets.navigationBars
+    windowInsets = WindowInsets.navigationBars,
+    containerColor = MaterialTheme.colorScheme.surface,
+    tonalElevation = 0.dp
 ) {
     Text(
         text = stringResource(id = R.string.menu_advanced_menu),
@@ -170,6 +178,12 @@ private fun BottomSheet(
                 selected = menu.showUpdatedTime,
                 onClick = { setMenu(menu.copy(showUpdatedTime = !menu.showUpdatedTime)) },
                 label = { Text(text = stringResource(id = R.string.menu_show_updated)) }
+            )
+
+            MenuChip(
+                selected = isHomepage,
+                onClick = setHomepage,
+                label = { Text(text = stringResource(id = R.string.menu_set_homepage)) }
             )
         }
     }

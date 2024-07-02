@@ -10,6 +10,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dev.sanmer.mrepo.Compat
+import dev.sanmer.mrepo.datastore.model.Homepage
 import dev.sanmer.mrepo.datastore.model.ModulesMenu
 import dev.sanmer.mrepo.datastore.model.Option
 import dev.sanmer.mrepo.model.json.UpdateJson
@@ -23,6 +24,7 @@ import dev.sanmer.mrepo.service.DownloadService
 import dev.sanmer.mrepo.stub.IModuleOpsCallback
 import dev.sanmer.mrepo.ui.activity.InstallActivity
 import dev.sanmer.mrepo.utils.StrUtil
+import dev.sanmer.su.wrap.ThrowableWrapper
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
@@ -69,9 +71,9 @@ class ModulesViewModel @Inject constructor(
             }
         }
 
-        override fun onFailure(id: String, msg: String?) {
+        override fun onFailure(id: String, error: ThrowableWrapper) {
             opsTasks.remove(id)
-            Timber.w("onFailure<$id>: $msg")
+            Timber.e(error.original)
         }
     }
 
@@ -167,6 +169,12 @@ class ModulesViewModel @Inject constructor(
     fun setModulesMenu(value: ModulesMenu) {
         viewModelScope.launch {
             userPreferencesRepository.setModulesMenu(value)
+        }
+    }
+
+    fun setHomepage() {
+        viewModelScope.launch {
+            userPreferencesRepository.setHomepage(Homepage.Modules)
         }
     }
 
